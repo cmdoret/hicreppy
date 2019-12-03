@@ -70,17 +70,17 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
                 )
             # Use average SCC from 10 subsamples
             chrom_scc[c] = np.mean(sample_scc)
-            print(
-                f"Found SCC of {round(chrom_scc[c], 3)} with h={h_value}.",
-                file=sys.stderr,
-            )
+        print(
+            f"Found SCC of {round(chrom_scc[c], 3)} with h={h_value}.",
+            file=sys.stderr,
+        )
         # Compute the genome SCC for this value of h using the weighted averge
         # of chromosomes SCC by their lengths. NaN values of SCC are not considered
         # This happens when comparing empty diagonals
         nan_scc_mask = ~np.isnan(chrom_scc)
-        chrom_scc = chrom_scc[nan_scc_mask]
-        chrom_lengths = np.array(chrom_lengths)[nan_scc_mask]
-        curr_scc = np.average(chrom_scc, weights=chrom_lengths)
+        trunc_scc = chrom_scc[nan_scc_mask]
+        trunc_lengths = np.array(chrom_lengths)[nan_scc_mask]
+        curr_scc = np.average(trunc_scc, weights=trunc_lengths)
         # Check if SCC improvement is less than threshold
         if curr_scc - prev_scc < 0.01:
             break
@@ -190,8 +190,8 @@ def get_scc(mat1, mat2, max_bins):
     """
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
-        trimmed_1 = cu.diag_trim(mat1.todia(), max_bins)
-        trimmed_2 = cu.diag_trim(mat2.todia(), max_bins)
+        trimmed_1 = cu.diag_trim(mat1.todia(), max_bins).tocsr()
+        trimmed_2 = cu.diag_trim(mat2.todia(), max_bins).tocsr()
     corr_diag = np.zeros(len(range(max_bins)))
     weight_diag = corr_diag.copy()
     for d in range(max_bins):
