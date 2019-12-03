@@ -33,8 +33,8 @@ from .. import __version__
     default="",
     help="Only include those chromosomes in the analysis. List of comma-separated chromosome names.",
 )
-@click.argument("cool1", type=click.Path(exists=True))
-@click.argument("cool2", type=click.Path(exists=True))
+@click.argument("cool1", type=click.Path(exists=False))
+@click.argument("cool2", type=click.Path(exists=False))
 def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
     """Find the optimal value for smoothing parameter h.
     The optimal h-value is printed to stdout. Run informations are printed to stderr.
@@ -81,8 +81,8 @@ def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
     default="",
     help="Only include those chromosomes in the analysis. List of comma-separated chromosome names.",
 )
-@click.argument("cool1", type=click.Path(exists=True))
-@click.argument("cool2", type=click.Path(exists=True))
+@click.argument("cool1", type=click.Path(exists=False))
+@click.argument("cool2", type=click.Path(exists=False))
 def genome_scc_cmd(
     cool1, cool2, max_dist, h_value, subsample, whitelist, blacklist
 ):

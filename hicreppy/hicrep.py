@@ -253,9 +253,10 @@ def make_chromlist(c, whitelist, blacklist, min_size=None):
             if chroms.loc[chrom].length < min_size:
                 chromlist.remove(chrom)
     n_removed = len(orig_chromlist) - len(chromlist)
-    print(
-        f"Removed {n_removed} chromosomes shorter than max_dist",
-        file=sys.stderr,
-    )
+    if n_removed > 0:
+        print(
+            f"Removed {n_removed} chromosomes shorter than max_dist",
+            file=sys.stderr,
+        )
     chrom_lengths = chroms.loc[chromlist].length.values.tolist()
     return chromlist, chrom_lengths
