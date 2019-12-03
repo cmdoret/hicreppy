@@ -1,4 +1,4 @@
-### hicreppy
+# hicreppy
 **cmdoret**
 
 This is a python reimplementation of hicrep's algorithm with added support for sparse matrices (in .cool format). 

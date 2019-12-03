@@ -12,8 +12,18 @@ matrix:
 os:
 - linux
 install:
-- pip install -v -r requirements.txt # install dependencies
-- pip install codecov pytest pytest-cov pylint pytest-pylint # install test dependencies
+- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+- bash miniconda.sh -b -p $HOME/miniconda
+- source "$HOME/miniconda/etc/profile.d/conda.sh"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda config --add channels bioconda
+- conda update -q conda
+- conda info -a
+- conda create -c conda-forge -q -n test-environment python="$TRAVIS_PYTHON_VERSION" pytest  pytest-cov  pylint codecov  cooler pylint
+- conda activate test-environment
+- pip install -Ur requirements.txt
+- pip install pytest-pylint
 script:
 - pytest --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc hicreppy # Run linting on code
 - pytest --cov=hicreppy # Run tests and make coverage report
