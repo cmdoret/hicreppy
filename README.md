@@ -1,8 +1,10 @@
 # hicreppy
 **cmdoret**
 
+
 [![PyPI version](https://badge.fury.io/py/hicreppy.svg)](https://badge.fury.io/py/hicreppy)
 [![Build Status](https://travis-ci.com/cmdoret/hicreppy.svg)](https://travis-ci.com/cmdoret/hicreppy)
+[![codecov](https://codecov.io/gh/cmdoret/hicreppy/branch/master/graph/badge.svg)](https://codecov.io/gh/cmdoret/hicreppy)
 [![License: GPLv3](https://img.shields.io/badge/License-GPL%203-0298c3.svg)](https://opensource.org/licenses/GPL-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
