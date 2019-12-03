@@ -6,7 +6,7 @@ This is a python reimplementation of hicrep's algorithm with added support for s
 hicrep measures similarity between Hi-C samples by computing a stratum-adjusted correlation coefficient (SCC). In this implementation, the SCC is computed separately for each chromosome and the chromosome length-weighted average of SCCs is computed.
 
 hicrep is published at:
-> HiCRep: assessing the reproducibility of Hi-C data using a stratum-adjusted correlation coefficient. Tao Yang, Feipeng Zhang, Galip Gurkan Yardimci, Ross C Hardison, William Stafford Noble, Feng Yue, Qunhua Li bioRxiv 101386; doi: https://doi.org/10.1101/101386
+> HiCRep: assessing the reproducibility of Hi-C data using a stratum-adjusted correlation coefficient. Tao Yang, Feipeng Zhang, Galip Gurkan Yardimci, Ross C Hardison, William Stafford Noble, Feng Yue, Qunhua Li, 2017, Genome Research, doi: 10.1101/gr.220640.117
 
 The original implementation, in R can be found at https://github.com/MonkeyLB/hicrep
 

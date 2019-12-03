@@ -44,7 +44,7 @@ def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
     wl = _parse_cli_chroms(whitelist)
     bl = _parse_cli_chroms(blacklist)
     # Print best h value to stdout
-    print(cr.h_train(c1, c2, max_dist, h_range, whitelist=wl, blacklist=bl))
+    print(cr.h_train(c1, c2, max_dist, h_max, whitelist=wl, blacklist=bl))
 
 
 @click.command()
