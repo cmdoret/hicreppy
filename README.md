@@ -30,6 +30,7 @@ pip install --user hicreppy
 To find the optimal value for smoothing parameter h, you can use the htrain subcommand:
 
 ```
+
 Usage: hicreppy htrain [OPTIONS] COOL1 COOL2
 
   Find the optimal value for smoothing parameter h. The optimal h-value is
@@ -52,6 +53,7 @@ Options:
 To compute the SCC between two matrices, use the scc subcommand. The optimal h value obtained with htrain should be provided to the flag `-v`:
 
 ```
+
 Usage: hicreppy scc [OPTIONS] COOL1 COOL2
 
   Compute the stratum-adjusted correlation coefficient for input matrices
@@ -72,3 +74,15 @@ Options:
 ```
 
 When running multiple pairwise comparisons, compute the optimal h value once between two highly similar samples and reuse the h value for all `scc` commands
+
+### Contributing
+
+All contributions are welcome. We use the [numpy standard](https://numpydoc.readthedocs.io/en/latest/format.html) for docstrings when documenting functions.
+
+The code formatting standard we use is [black](https://github.com/psf/black), with --line-length=79 to follow PEP8 recommendations. We use `pytest` with the `pytest-doctest` and `pytest-pylint` plugins as our testing framework. Ideally, new functions should have associated unit tests, placed in the `tests` folder.
+
+To test the code, you can run:
+
+```bash
+pytest --doctest-modules --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc hicreppy tests
+```
