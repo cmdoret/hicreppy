@@ -116,11 +116,11 @@ def genome_scc(
     h : int
         The smoothing parameter. A mean filter is used to smooth matrices, this value
         is the size of the filter.
-    subsample : int
-        The number of contacts to which matrices should be subsampled. When you plan to
-        compare multiple matrices, it can be useful to subsample all of them to the
-        same value to remove potential biases caused by different coverages. Set to 0 to
-        disable subsampling.
+    subsample : float
+        The number of contacts to which matrices should be subsampled, if greater than 1,
+        the proportion of contacts to keep, if between 0 and 1. When you plan to compare
+        multiple matrices, it can be useful to subsample all of them to the same value to
+        remove potential biases caused by different coverages. Set to 0 to disable subsampling.
     whitelist : None or list of strs
         If given, only compare those chromosomes.
     blacklist : None or list of strs
@@ -143,6 +143,18 @@ def genome_scc(
     chromlist, chrom_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
+    
+    # Convert to numer of contacts to proportions if needed.
+    if subsample > 1:
+        subsample_prop_1 = subsample / mat1.info['sum']
+        subsample_prop_2 = subsample / mat2.info['sum']
+    else:
+        subsample_prop_1 = subsample_prop_2 = subsample
+
+    if subsample_prop_1 > 1 or subsample_prop_2 > 1:
+        raise ValueError("Subsampling value exceeds matrix contacts")
+    if subsample_prop_1 < 0 or subsample_prop_2 < 0:
+        raise ValueError("Subsampling values must be positive")
 
     # Compute SCC values separately for each chromosome
     chrom_scc = np.zeros(len(chromlist))
@@ -151,8 +163,8 @@ def genome_scc(
         chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
         # Sample 10% contacts and smooth 10 times for this chromosome
         if subsample > 0:
-            chrom_1 = cu.subsample_contacts(chrom_1, subsample)
-            chrom_2 = cu.subsample_contacts(chrom_2, subsample)
+            chrom_1 = cu.subsample_contacts(chrom_1, subsample_prop_1)
+            chrom_2 = cu.subsample_contacts(chrom_2, subsample_prop_2)
         smooth_1 = cu.smooth(chrom_1, h)
         smooth_2 = cu.smooth(chrom_2, h)
 
