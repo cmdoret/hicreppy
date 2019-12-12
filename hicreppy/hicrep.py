@@ -47,16 +47,16 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
     # NOTE: chromosomes smaller than the kernel used for smoothing or the max_dist must
     # be removed.
     min_size = max((2 * h_max + 1) * mat1.binsize, max_dist)
-    chromlist, chrom_lengths = make_chromlist(
+    chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
 
     prev_scc = -np.inf
     for h, h_value in enumerate(range(h_max)):
         # Compute SCC values separately for each chromosome
-        chrom_scc = np.zeros(len(chromlist))
+        chroms_scc = np.zeros(len(chromlist))
         for c, chrom in enumerate(chromlist):
-            sample_scc = np.zeros(10)
+            samples_scc = np.zeros(10)
             chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
             chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
             # Sample 10% contacts and smooth 10 times for this chromosome
@@ -65,22 +65,22 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
                 sub_2 = cu.subsample_contacts(chrom_2, 0.1)
                 smooth_1 = cu.smooth(sub_1, h_value)
                 smooth_2 = cu.smooth(sub_2, h_value)
-                sample_scc[sample] = get_scc(
+                samples_scc[sample] = get_scc(
                     smooth_1, smooth_2, max_bins=max_bins
                 )
             # Use average SCC from 10 subsamples
-            chrom_scc[c] = np.mean(sample_scc)
-        print(
-            f"Found SCC of {round(chrom_scc[c], 3)} with h={h_value}.",
-            file=sys.stderr,
-        )
+            chroms_scc[c] = np.nanmean(samples_scc)
         # Compute the genome SCC for this value of h using the weighted averge
         # of chromosomes SCC by their lengths. NaN values of SCC are not considered
         # This happens when comparing empty diagonals
-        nan_scc_mask = ~np.isnan(chrom_scc)
-        trunc_scc = chrom_scc[nan_scc_mask]
-        trunc_lengths = np.array(chrom_lengths)[nan_scc_mask]
+        nan_scc_mask = ~np.isnan(chroms_scc)
+        trunc_scc = chroms_scc[nan_scc_mask]
+        trunc_lengths = np.array(chroms_lengths)[nan_scc_mask]
         curr_scc = np.average(trunc_scc, weights=trunc_lengths)
+        print(
+            f"Found SCC of {round(curr_scc, 3)} with h={h_value}.",
+            file=sys.stderr,
+        )
         # Check if SCC improvement is less than threshold
         if curr_scc - prev_scc < 0.01:
             break
@@ -140,7 +140,7 @@ def genome_scc(
     # NOTE: chromosomes smaller than the kernel used for smoothing or the max_dist must
     # be removed.
     min_size = max((2 * h + 1) * mat1.binsize, max_dist)
-    chromlist, chrom_lengths = make_chromlist(
+    chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
     
@@ -157,7 +157,7 @@ def genome_scc(
         raise ValueError("Subsampling values must be positive")
 
     # Compute SCC values separately for each chromosome
-    chrom_scc = np.zeros(len(chromlist))
+    chroms_scc = np.zeros(len(chromlist))
     for c, chrom in enumerate(chromlist):
         chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
         chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
@@ -168,14 +168,14 @@ def genome_scc(
         smooth_1 = cu.smooth(chrom_1, h)
         smooth_2 = cu.smooth(chrom_2, h)
 
-        chrom_scc[c] = get_scc(smooth_1, smooth_2, max_bins=max_bins)
+        chroms_scc[c] = get_scc(smooth_1, smooth_2, max_bins=max_bins)
     # Compute the genome SCC using the weighted averge of chromosomes
     # SCC by their lengths. NaN values of SCC are not considered
     # This happens when comparing empty diagonals
-    nan_scc_mask = ~np.isnan(chrom_scc)
-    chrom_scc = chrom_scc[nan_scc_mask]
-    chrom_lengths = np.array(chrom_lengths)[nan_scc_mask]
-    scc = np.average(chrom_scc, weights=chrom_lengths)
+    nan_scc_mask = ~np.isnan(chroms_scc)
+    trunc_scc = chroms_scc[nan_scc_mask]
+    trunc_lengths = np.array(chroms_lengths)[nan_scc_mask]
+    scc = np.average(trunc_scc, weights=trunc_lengths)
     return scc
 
 
