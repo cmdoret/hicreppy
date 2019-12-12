@@ -29,11 +29,6 @@ CLASSIFIERS = [
 
 name = "hicreppy"
 
-MAJOR = 0
-MINOR = 0
-MAINTENANCE = 0
-VERSION = "{}.{}.{}".format(MAJOR, MINOR, MAINTENANCE)
-
 LICENSE = "GPLv2"
 URL = "https://github.com/cmdoret/hicreppy"
 
