@@ -59,10 +59,17 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
             samples_scc = np.zeros(10)
             chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
             chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
+            # Trim diagonals which are too far to be scanned to reduce
+            # compute time and memory usage
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
+                chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h).tocoo()
+                chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h).tocoo()
             # Sample 10% contacts and smooth 10 times for this chromosome
             for sample in range(10):
                 sub_1 = cu.subsample_contacts(chrom_1, 0.1)
                 sub_2 = cu.subsample_contacts(chrom_2, 0.1)
+                # Smooth the matrix using a mean filter
                 smooth_1 = cu.smooth(sub_1, h_value)
                 smooth_2 = cu.smooth(sub_2, h_value)
                 samples_scc[sample] = get_scc(
@@ -165,6 +172,13 @@ def genome_scc(
         if subsample > 0:
             chrom_1 = cu.subsample_contacts(chrom_1, subsample_prop_1)
             chrom_2 = cu.subsample_contacts(chrom_2, subsample_prop_2)
+
+        # Trim diagonals which are too far to be scanned to reduce
+        # compute time and memory usage
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
+            chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h).tocoo()
+            chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h).tocoo()
         smooth_1 = cu.smooth(chrom_1, h)
         smooth_2 = cu.smooth(chrom_2, h)
 
@@ -200,15 +214,11 @@ def get_scc(mat1, mat2, max_bins):
     scc : float
         Stratum adjusted correlation coefficient.
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
-        trimmed_1 = cu.diag_trim(mat1.todia(), max_bins).tocsr()
-        trimmed_2 = cu.diag_trim(mat2.todia(), max_bins).tocsr()
     corr_diag = np.zeros(len(range(max_bins)))
     weight_diag = corr_diag.copy()
     for d in range(max_bins):
-        d1 = trimmed_1.diagonal(d)
-        d2 = trimmed_2.diagonal(d)
+        d1 = mat1.diagonal(d)
+        d2 = mat2.diagonal(d)
         # Silence NaN warnings: this happens for empty diagonals and will
         # not be used in the end.
         with warnings.catch_warnings():
