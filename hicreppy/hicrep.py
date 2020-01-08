@@ -62,7 +62,9 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
             # Trim diagonals which are too far to be scanned to reduce
             # compute time and memory usage
             with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
+                warnings.filterwarnings(
+                    "ignore", category=SparseEfficiencyWarning
+                )
                 chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h).tocoo()
                 chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h).tocoo()
             # Sample 10% contacts and smooth 10 times for this chromosome
@@ -150,11 +152,11 @@ def genome_scc(
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
-    
+
     # Convert to numer of contacts to proportions if needed.
     if subsample > 1:
-        subsample_prop_1 = subsample / mat1.info['sum']
-        subsample_prop_2 = subsample / mat2.info['sum']
+        subsample_prop_1 = subsample / mat1.info["sum"]
+        subsample_prop_2 = subsample / mat2.info["sum"]
     else:
         subsample_prop_1 = subsample_prop_2 = subsample
 
@@ -222,9 +224,13 @@ def get_scc(mat1, mat2, max_bins):
         # Silence NaN warnings: this happens for empty diagonals and will
         # not be used in the end.
         with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore", category=ss.PearsonRConstantInputWarning
-            )
+            # Warning does not exist in older scipy versions (<=1.2)
+            try:
+                warnings.filterwarnings(
+                    "ignore", category=ss.PearsonRConstantInputWarning
+                )
+            except AttributeError:
+                pass
             # Compute raw pearson coeff for this diag
             corr_diag[d] = ss.pearsonr(d1, d2)[0]
         # Compute weight for this diag
