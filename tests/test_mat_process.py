@@ -84,6 +84,7 @@ def test_subsample_contacts_count(n_contacts):
 @pytest.mark.parametrize(*GAUSS_MATS)
 def test_diag_trim(signal):
     """Check if trimming diagonals preserves shape and sets diagonals to zero."""
+    # Sparse version
     for d in range(signal.shape[0]):
         trimmed = hmp.diag_trim(signal.todia(), d)
         diag_sums = [
@@ -91,4 +92,20 @@ def test_diag_trim(signal):
         ]
         assert trimmed.shape == signal.shape
         assert np.sum(diag_sums[d + 1 :]) == 0
+    # Dense version
+    signal = signal.toarray()
+    for d in range(signal.shape[0]):
+        trimmed = hmp.diag_trim(signal, d)
+        diag_sums = [
+            trimmed.diagonal(d).sum() for d in range(trimmed.shape[0])
+        ]
+        assert trimmed.shape == signal.shape
+        assert np.sum(diag_sums[d + 1 :]) == 0
 
+
+def test_set_mat_diag():
+    """Test if dense matrix's nth diagonal is set to appropriate value"""
+    dense_mat = np.zeros((10, 10))
+    # The function operates in place
+    hmp.set_mat_diag(dense_mat, diag=1, val=4)
+    assert np.all(dense_mat.diagonal(1) == 4)
