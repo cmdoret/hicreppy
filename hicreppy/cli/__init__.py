@@ -65,7 +65,7 @@ def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
 @click.option(
     "--subsample",
     "-s",
-    default=0,
+    default=None,
     show_default=True,
     help="Subsample contacts from both matrices to target value. Leave to 0 to disable subsampling.",
 )

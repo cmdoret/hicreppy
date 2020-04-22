@@ -44,9 +44,11 @@ with open("requirements.txt", "r") as f:
 def get_version():
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-        open(os.path.join('hicreppy', '__init__.py')).read(),
-        re.MULTILINE).group(1)
+        open(os.path.join("hicreppy", "__init__.py")).read(),
+        re.MULTILINE,
+    ).group(1)
     return version
+
 
 setup(
     name=name,
