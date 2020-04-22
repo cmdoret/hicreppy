@@ -1,4 +1,5 @@
 import sys
+from typing import Optional, Iterable, List, Tuple
 import hicreppy.utils.mat_process as cu
 import numpy as np
 import scipy.stats as ss
@@ -6,7 +7,14 @@ from scipy.sparse import SparseEfficiencyWarning
 import warnings
 
 
-def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
+def h_train(
+    mat1: 'cooler.Cooler',
+    mat2: 'cooler.Cooler',
+    max_dist: int,
+    h_max: int,
+    whitelist: Optional[Iterable[str]] = None,
+    blacklist: Optional[Iterable[str]] = None,
+) -> int:
     """
     Find the optimal value for the smoothing parameter h.  For each value of h
     in h_range, in ascending order, separate intrachromosomal sub-matrices of
@@ -105,8 +113,14 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
 
 
 def genome_scc(
-    mat1, mat2, max_dist, h, subsample=0, whitelist=None, blacklist=None
-):
+    mat1: 'cooler.Cooler',
+    mat2: 'cooler.Cooler',
+    max_dist: int,
+    h: int,
+    subsample: Optional[float] = None,
+    whitelist: Optional[Iterable[str]] = None,
+    blacklist: Optional[Iterable[str]] = None,
+) -> float:
     """Compute the Stratum-adjusted correlation coefficient (SCC) for the whole
     genome from cool files.
 
@@ -126,7 +140,7 @@ def genome_scc(
     h : int
         The smoothing parameter. A mean filter is used to smooth matrices, this
         value is the size of the filter.
-    subsample : float
+    subsample : None or float
         The number of contacts to which matrices should be subsampled, if
         greater than 1, the proportion of contacts to keep, if between 0 and 1.
         When you plan to compare multiple matrices, it can be useful to
@@ -155,17 +169,19 @@ def genome_scc(
         mat1, whitelist, blacklist, min_size=min_size
     )
 
-    # Convert to numer of contacts to proportions if needed.
-    if subsample > 1:
-        subsample_prop_1 = subsample / mat1.info["sum"]
-        subsample_prop_2 = subsample / mat2.info["sum"]
-    else:
-        subsample_prop_1 = subsample_prop_2 = subsample
+    # Convert to number of contacts to proportions if needed.
+    if subsample is not None:
+        if subsample > 1:
+            subsample_prop_1 = subsample / mat1.info["sum"]
+            subsample_prop_2 = subsample / mat2.info["sum"]
+        else:
+            subsample_prop_1 = subsample_prop_2 = subsample
+        if subsample_prop_1 > 1 or subsample_prop_2 > 1:
+            raise ValueError("Subsampling value exceeds matrix contacts")
+        if subsample_prop_1 < 0 or subsample_prop_2 < 0:
+            raise ValueError("Subsampling values must be positive")
 
-    if subsample_prop_1 > 1 or subsample_prop_2 > 1:
-        raise ValueError("Subsampling value exceeds matrix contacts")
-    if subsample_prop_1 < 0 or subsample_prop_2 < 0:
-        raise ValueError("Subsampling values must be positive")
+
 
     # Compute SCC values separately for each chromosome
     chroms_scc = np.zeros(len(chromlist))
@@ -173,7 +189,7 @@ def genome_scc(
         chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
         chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
         # Sample 10% contacts and smooth 10 times for this chromosome
-        if subsample > 0:
+        if subsample is not None:
             chrom_1 = cu.subsample_contacts(chrom_1, subsample_prop_1)
             chrom_2 = cu.subsample_contacts(chrom_2, subsample_prop_2)
 
@@ -197,7 +213,9 @@ def genome_scc(
     return scc
 
 
-def get_scc(mat1, mat2, max_bins):
+def get_scc(
+    mat1: 'scipy.sparse.csr_matrix', mat2: 'scipy.sparse.csr_matrix', max_bins: int
+) -> float:
     """
     Compute the stratum-adjusted correlation coefficient (SCC) between two
     Hi-C matrices up to max_dist. A Pearson correlation coefficient is computed
@@ -247,7 +265,12 @@ def get_scc(mat1, mat2, max_bins):
     return scc
 
 
-def make_chromlist(c, whitelist, blacklist, min_size=None):
+def make_chromlist(
+    c: 'cooler.Cooler',
+    whitelist: Optional[Iterable[str]] = None,
+    blacklist: Optional[Iterable[str]] = None,
+    min_size: Optional[int] = None,
+) -> Tuple[List[str], List[int]]:
     """Given a cool object, a blacklist and whitelist of chromosomes, return
     the list of chromosomes to include in the analysis.
 

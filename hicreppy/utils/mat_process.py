@@ -1,8 +1,11 @@
+from typing import Union
 import numpy as np
 import scipy.sparse as sp
 
 
-def smooth(signal, h):
+def smooth(
+    signal: "scipy.sparse.coo_matrix", h: int
+) -> "scipy.sparse.coo_matrix":
     """
     Smooth (blur) input sparse Hi-C sparse matrix using a uniform kernel of
     width 2*h+1.
@@ -52,7 +55,9 @@ def smooth(signal, h):
     return out
 
 
-def vstrans(d1, d2):
+def vstrans(
+    d1: "numpy.ndarray[float]", d2: "numpy.ndarray[float]"
+) -> "numpy.ndarray[float]":
     """
     Variance stabilizing transformation to normalize read counts before
     computing stratum correlation. This normalizes counts so that different
@@ -60,14 +65,14 @@ def vstrans(d1, d2):
 
     Parameters
     ----------
-    d1 : numpy.array of floats
+    d1 : numpy.ndarray of floats
         Diagonal of the first matrix.
-    d2 : numpy.array of floats
+    d2 : numpy.ndarray of floats
         Diagonal of the second matrix.
 
     Returns
     -------
-    r2k : numpy.array of floats
+    r2k : numpy.ndarray of floats
         Array of weights to use to normalize counts.
     """
     # Get ranks of counts in diagonal
@@ -81,7 +86,9 @@ def vstrans(d1, d2):
     return r2k
 
 
-def subsample_contacts(M, n_contacts):
+def subsample_contacts(
+    M: "scipy.sparse.coo_matrix", n_contacts: float
+) -> "scipy.sparse.coo_matrix":
     """Bootstrap sampling of contacts in a sparse Hi-C map.
 
     Parameters
@@ -132,7 +139,9 @@ def subsample_contacts(M, n_contacts):
     )
 
 
-def diag_trim(mat, n):
+def diag_trim(
+    mat: Union["scipy.sparse.dia_matrix", "numpy.ndarray"], n: int
+) -> Union["scipy.sparse.dia_matrix", "numpy.ndarray"]:
     """
     Trim an upper triangle sparse matrix so that only the first n diagonals are
     kept.
@@ -140,14 +149,14 @@ def diag_trim(mat, n):
     Parameters
     ----------
 
-    mat : scipy.sparse.dia_matrix or numpy.array
+    mat : scipy.sparse.dia_matrix or numpy.ndarray
         The sparse matrix to be trimmed
     n : int
         The number of diagonals from the center to keep (0-based).
 
     Returns
     -------
-    scipy.sparse.dia_matrix or numpy.array:
+    scipy.sparse.dia_matrix or numpy.ndarray:
         The diagonally trimmed upper triangle matrix with only the first n
         diagonal.
     """
@@ -170,14 +179,14 @@ def diag_trim(mat, n):
     return trimmed
 
 
-def set_mat_diag(mat, diag=0, val=0):
+def set_mat_diag(mat: "numpy.ndarray", diag: int = 0, val: int = 0) -> float:
     """
     Set the nth diagonal of a symmetric 2D numpy array to a fixed value.
     Operates in place.
 
     Parameters
     ----------
-    mat : numpy.array
+    mat : numpy.ndarray
         Symmetric 2D array of floats.
     diag : int
         0-based index of the diagonal to modify. Use negative values for the
