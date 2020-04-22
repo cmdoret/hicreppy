@@ -30,7 +30,6 @@ def smooth(signal, h):
         raise ValueError("cannot handle signal in dense format")
 
     constant_kernel = kernel[0, 0]
-    out = sp.csc_matrix((sm - km + 1, sn - km + 1), dtype=np.float64)
 
     # Simplified convolution for the special case where kernel is constant:
     l_subkernel_sp = sp.diags(
