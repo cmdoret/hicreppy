@@ -4,7 +4,8 @@ import scipy.sparse as sp
 
 def smooth(signal, h):
     """
-    Smooth (blur) input sparse Hi-C sparse matrix using a uniform kernel of width 2*h+1.
+    Smooth (blur) input sparse Hi-C sparse matrix using a uniform kernel of
+    width 2*h+1.
 
     Parameters
     ----------
@@ -53,9 +54,9 @@ def smooth(signal, h):
 
 def vstrans(d1, d2):
     """
-    Variance stabilizing transformation to normalize read counts before computing
-    stratum correlation. This normalizes counts so that different strata share similar
-    dynamic ranges.
+    Variance stabilizing transformation to normalize read counts before
+    computing stratum correlation. This normalizes counts so that different
+    strata share similar dynamic ranges.
 
     Parameters
     ----------
@@ -133,7 +134,8 @@ def subsample_contacts(M, n_contacts):
 
 def diag_trim(mat, n):
     """
-    Trim an upper triangle sparse matrix so that only the first n diagonals are kept.
+    Trim an upper triangle sparse matrix so that only the first n diagonals are
+    kept.
 
     Parameters
     ----------
@@ -146,7 +148,8 @@ def diag_trim(mat, n):
     Returns
     -------
     scipy.sparse.dia_matrix or numpy.array:
-        The diagonally trimmed upper triangle matrix with only the first n diagonal.
+        The diagonally trimmed upper triangle matrix with only the first n
+        diagonal.
     """
     if not sp.issparse(mat):
         trimmed = mat.copy()
@@ -158,7 +161,7 @@ def diag_trim(mat, n):
     if mat.format != "dia":
         raise ValueError("input type must be scipy.sparse.dia_matrix")
     # Create a new matrix from the diagonals below max dist (faster than removing them)
-    keep_offsets = np.where((mat.offsets <= n) & (mat.offsets >= 0))[0]
+    keep_offsets = np.flatnonzero((mat.offsets <= n) & (mat.offsets >= 0))
 
     trimmed = sp.dia_matrix(
         (mat.data[keep_offsets], mat.offsets[keep_offsets]), shape=mat.shape

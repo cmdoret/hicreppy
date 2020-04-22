@@ -8,26 +8,27 @@ import warnings
 
 def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
     """
-    Find the optimal value for the smoothing parameter h.
-    For each value of h in h_range, in ascending order, separate intrachromosomal
-    sub-matrices of each chromosome. Each sub-matrix is subsampled to 10% contacts
-    and the stratum adjusted correlation coefficient (SCC) is computed 10 times between
-    the corresponding chromosome of both samples. The mean of those 10 repetitions is computed
-    for each chromosome and their mean weighted by chromosome length is used. The optimal h
-    value is defined as the smallest value for which the increment of scc is less than 0.01.
+    Find the optimal value for the smoothing parameter h.  For each value of h
+    in h_range, in ascending order, separate intrachromosomal sub-matrices of
+    each chromosome. Each sub-matrix is subsampled to 10% contacts and the
+    stratum adjusted correlation coefficient (SCC) is computed 10 times between
+    the corresponding chromosome of both samples. The mean of those 10
+    repetitions is computed for each chromosome and their mean weighted by
+    chromosome length is used. The optimal h value is defined as the smallest
+    value for which the increment of scc is less than 0.01.
 
 
     Parameters
     ----------
     mat1 : cooler.Cooler
-        First matrix to compare. A Cooler object returned when loading a cool file.
+        First matrix to compare.
     mat2 : cooler.Cooler
-        Second matrix to compare. A Cooler object returned when loading a cool file.
+        Second matrix to compare.
     max_dist : int
         Maximum distance at which ton consider interactions, in basepairs.
     h_max : int 
-        The maximum value of the smoothing parameter h (neighbourhood size) to test.
-        All values between 0 and h_max will be explored.
+        The maximum value of the smoothing parameter h (neighbourhood size) to
+        test. All values between 0 and h_max will be explored.
     whitelist : None or list of strs
         If given, only compare those chromosomes.
     blacklist : None or list of strs
@@ -106,29 +107,31 @@ def h_train(mat1, mat2, max_dist, h_max, whitelist=None, blacklist=None):
 def genome_scc(
     mat1, mat2, max_dist, h, subsample=0, whitelist=None, blacklist=None
 ):
-    """Compute the Stratum-adjusted correlation coefficient (SCC) for the whole genome
-    from cool files.
+    """Compute the Stratum-adjusted correlation coefficient (SCC) for the whole
+    genome from cool files.
 
-    Separate intrachromosomal sub-matrices of each chromosome. Compute the stratum adjusted
-    correlation coefficient (SCC) between the corresponding chromosome of both samples.
-    The mean of SCCs weighted by chromosome length is used. 
+    Separate intrachromosomal sub-matrices of each chromosome. Compute the
+    stratum adjusted correlation coefficient (SCC) between the corresponding
+    chromosome of both samples.  The mean of SCCs weighted by chromosome length
+    is used. 
 
     Parameters
     ----------
     mat1 : cooler.Cooler
-        First matrix to compare. A Cooler object returned when loading a cool file.
+        First matrix to compare.
     mat2 : cooler.Cooler
-        Second matrix to compare. A Cooler object returned when loading a cool file.
+        Second matrix to compare.
     max_dist : int
         Maximum distance at which ton consider interactions, in basepairs.
     h : int
-        The smoothing parameter. A mean filter is used to smooth matrices, this value
-        is the size of the filter.
+        The smoothing parameter. A mean filter is used to smooth matrices, this
+        value is the size of the filter.
     subsample : float
-        The number of contacts to which matrices should be subsampled, if greater than 1,
-        the proportion of contacts to keep, if between 0 and 1. When you plan to compare
-        multiple matrices, it can be useful to subsample all of them to the same value to
-        remove potential biases caused by different coverages. Set to 0 to disable subsampling.
+        The number of contacts to which matrices should be subsampled, if
+        greater than 1, the proportion of contacts to keep, if between 0 and 1.
+        When you plan to compare multiple matrices, it can be useful to
+        subsample all of them to the same value to remove potential biases
+        caused by different coverages. Set to 0 to disable subsampling.
     whitelist : None or list of strs
         If given, only compare those chromosomes.
     blacklist : None or list of strs
@@ -145,8 +148,8 @@ def genome_scc(
     max_bins = max_dist // mat1.binsize
 
     # Define chromosomes to scan
-    # NOTE: chromosomes smaller than the kernel used for smoothing or the max_dist must
-    # be removed.
+    # NOTE: chromosomes smaller than the kernel used for smoothing or the
+    # max_dist must be removed.
     min_size = max((2 * h + 1) * mat1.binsize, max_dist)
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
@@ -245,13 +248,13 @@ def get_scc(mat1, mat2, max_bins):
 
 
 def make_chromlist(c, whitelist, blacklist, min_size=None):
-    """Given a cool object, a blacklist and whitelist of chromosomes, return the list
-    of chromosomes to include in the analysis.
+    """Given a cool object, a blacklist and whitelist of chromosomes, return
+    the list of chromosomes to include in the analysis.
 
     Parameters
     ----------
     c : cooler.Cooler
-        First matrix to compare. A Cooler object returned when loading a cool file.
+        First matrix to compare.
     whitelist : None or list of strs
         If given, only compare those chromosomes.
     blacklist : None or list of strs
