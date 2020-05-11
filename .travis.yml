@@ -25,8 +25,7 @@ install:
 - pip install -Ur requirements.txt
 - pip install pytest-pylint
 script:
-- pytest --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc hicreppy # Run linting on code
-- pytest --cov=hicreppy # Run tests and make coverage report
+- pytest --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc --cov=hicreppy # Run tests, linting and make coverage report
 after_success:
 - codecov
 deploy:
