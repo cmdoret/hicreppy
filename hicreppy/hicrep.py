@@ -58,6 +58,11 @@ def h_train(
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
+    if not len(chromlist):
+        raise KeyError(
+            "All chromosomes were too short and have been discarded. "
+            "Try reducing max_dist."
+        )
 
     prev_scc = -np.inf
     for h, h_value in enumerate(range(h_max)):
@@ -168,6 +173,11 @@ def genome_scc(
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
+    if not len(chromlist):
+        raise KeyError(
+            "All chromosomes were too short and have been discarded. "
+            "Try reducing max_dist."
+        )
 
     # Convert to number of contacts to proportions if needed.
     if subsample is not None:
