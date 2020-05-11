@@ -91,6 +91,15 @@ def genome_scc_cmd(
     c2 = clr.Cooler(cool2)
     wl = _parse_cli_chroms(whitelist)
     bl = _parse_cli_chroms(blacklist)
+
+    # Make sure a proper value was given to subsample
+    if subsample is not None:
+        try:
+            subsample = float(subsample)
+        except ValueError:
+            raise(
+                "Subsample must be a float between 0 and 1 or an integer."
+            )
     print(
         cr.genome_scc(
             c1,
