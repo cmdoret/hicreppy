@@ -97,9 +97,10 @@ def genome_scc_cmd(
         try:
             subsample = float(subsample)
         except ValueError:
-            raise(
+            print(
                 "Subsample must be a float between 0 and 1 or an integer."
             )
+            raise
     print(
         cr.genome_scc(
             c1,
