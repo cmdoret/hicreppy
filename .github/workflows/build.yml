@@ -30,5 +30,5 @@ jobs:
         python -m pip install -e .
     - name: Run tests, lint and compute coverage with pytest
       run: |
-        pytest --pylint --pylint-error-types=EF --pylint-ecfile=.pylintrc --cov=hicreppy
+        pytest --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc --cov=hicreppy
         codecov
