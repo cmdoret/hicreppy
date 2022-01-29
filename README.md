@@ -3,7 +3,7 @@
 
 
 [![PyPI version](https://badge.fury.io/py/hicreppy.svg)](https://badge.fury.io/py/hicreppy)
-[![Build Status](https://travis-ci.com/cmdoret/hicreppy.svg)](https://travis-ci.com/cmdoret/hicreppy)
+[![build](https://github.com/cmdoret/hicreppy/actions/workflows/build.yml/badge.svg)](https://github.com/cmdoret/hicreppy/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/cmdoret/hicreppy/branch/master/graph/badge.svg)](https://codecov.io/gh/cmdoret/hicreppy)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/cmdoret/hicreppy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cmdoret/hicreppy/context:python)
 
