@@ -270,7 +270,7 @@ def get_scc(
     weight_diag /= sum(weight_diag)
 
     # Weighted sum of coefficients to get SCCs
-    scc = np.sum(corr_diag * weight_diag)
+    scc = np.nansum(corr_diag * weight_diag)
 
     return scc
 
