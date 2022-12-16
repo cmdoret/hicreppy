@@ -1,15 +1,17 @@
 import sys
 from typing import Optional, Iterable, List, Tuple
+import warnings
+
+import cooler
 import hicreppy.utils.mat_process as cu
 import numpy as np
 import scipy.stats as ss
-from scipy.sparse import SparseEfficiencyWarning
-import warnings
+import scipy.sparse as sp
 
 
 def h_train(
-    mat1: 'cooler.Cooler',
-    mat2: 'cooler.Cooler',
+    mat1: cooler.Cooler,
+    mat2: cooler.Cooler,
     max_dist: int,
     h_max: int,
     whitelist: Optional[Iterable[str]] = None,
@@ -34,7 +36,7 @@ def h_train(
         Second matrix to compare.
     max_dist : int
         Maximum distance at which ton consider interactions, in basepairs.
-    h_max : int 
+    h_max : int
         The maximum value of the smoothing parameter h (neighbourhood size) to
         test. All values between 0 and h_max will be explored.
     whitelist : None or list of strs
@@ -44,7 +46,7 @@ def h_train(
 
     Returns
     -------
-    int : 
+    int :
         Optimal value for the smoothing parameter h.
     """
     if mat1.binsize != mat2.binsize:
@@ -58,28 +60,27 @@ def h_train(
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
-    if not len(chromlist):
+    if not chromlist:
         raise KeyError(
             "All chromosomes were too short and have been discarded. "
             "Try reducing max_dist."
         )
 
+    h_value = None
     prev_scc = -np.inf
-    for h, h_value in enumerate(range(h_max)):
+    for h_idx, h_value in enumerate(range(h_max)):
         # Compute SCC values separately for each chromosome
         chroms_scc = np.zeros(len(chromlist))
-        for c, chrom in enumerate(chromlist):
+        for c_idx, chrom in enumerate(chromlist):
             samples_scc = np.zeros(10)
             chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
             chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
             # Trim diagonals which are too far to be scanned to reduce
             # compute time and memory usage
             with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore", category=SparseEfficiencyWarning
-                )
-                chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h).tocoo()
-                chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h).tocoo()
+                warnings.filterwarnings("ignore", category=sp.SparseEfficiencyWarning)
+                chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h_idx).tocoo()
+                chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h_idx).tocoo()
             # Sample 10% contacts and smooth 10 times for this chromosome
             for sample in range(10):
                 sub_1 = cu.subsample_contacts(chrom_1, 0.1)
@@ -87,11 +88,9 @@ def h_train(
                 # Smooth the matrix using a mean filter
                 smooth_1 = cu.smooth(sub_1, h_value)
                 smooth_2 = cu.smooth(sub_2, h_value)
-                samples_scc[sample] = get_scc(
-                    smooth_1, smooth_2, max_bins=max_bins
-                )
+                samples_scc[sample] = get_scc(smooth_1, smooth_2, max_bins=max_bins)
             # Use average SCC from 10 subsamples
-            chroms_scc[c] = np.nanmean(samples_scc)
+            chroms_scc[c_idx] = np.nanmean(samples_scc)
         # Compute the genome SCC for this value of h using the weighted averge
         # of chromosomes SCC by their lengths. NaN values of SCC are not considered
         # This happens when comparing empty diagonals
@@ -114,12 +113,12 @@ def h_train(
             file=sys.stderr,
         )
     # Return last h value with improvement >= 0.01
-    return max(h - 1, 0)
+    return max(h_idx - 1, 0)
 
 
 def genome_scc(
-    mat1: 'cooler.Cooler',
-    mat2: 'cooler.Cooler',
+    mat1: cooler.Cooler,
+    mat2: cooler.Cooler,
     max_dist: int,
     h: int,
     subsample: Optional[float] = None,
@@ -132,7 +131,7 @@ def genome_scc(
     Separate intrachromosomal sub-matrices of each chromosome. Compute the
     stratum adjusted correlation coefficient (SCC) between the corresponding
     chromosome of both samples.  The mean of SCCs weighted by chromosome length
-    is used. 
+    is used.
 
     Parameters
     ----------
@@ -191,8 +190,6 @@ def genome_scc(
         if subsample_prop_1 < 0 or subsample_prop_2 < 0:
             raise ValueError("Subsampling values must be positive")
 
-
-
     # Compute SCC values separately for each chromosome
     chroms_scc = np.zeros(len(chromlist))
     for c, chrom in enumerate(chromlist):
@@ -206,7 +203,7 @@ def genome_scc(
         # Trim diagonals which are too far to be scanned to reduce
         # compute time and memory usage
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
+            warnings.filterwarnings("ignore", category=sp.SparseEfficiencyWarning)
             chrom_1 = cu.diag_trim(chrom_1.todia(), max_bins + h).tocoo()
             chrom_2 = cu.diag_trim(chrom_2.todia(), max_bins + h).tocoo()
         smooth_1 = cu.smooth(chrom_1, h)
@@ -223,9 +220,7 @@ def genome_scc(
     return scc
 
 
-def get_scc(
-    mat1: 'scipy.sparse.csr_matrix', mat2: 'scipy.sparse.csr_matrix', max_bins: int
-) -> float:
+def get_scc(mat1: sp.csr_matrix, mat2: sp.csr_matrix, max_bins: int) -> float:
     """
     Compute the stratum-adjusted correlation coefficient (SCC) between two
     Hi-C matrices up to max_dist. A Pearson correlation coefficient is computed
@@ -248,9 +243,9 @@ def get_scc(
     """
     corr_diag = np.zeros(len(range(max_bins)))
     weight_diag = corr_diag.copy()
-    for d in range(max_bins):
-        d1 = mat1.diagonal(d)
-        d2 = mat2.diagonal(d)
+    for bin_idx in range(max_bins):
+        diag_1 = mat1.diagonal(bin_idx)
+        diag_2 = mat2.diagonal(bin_idx)
         # Silence NaN warnings: this happens for empty diagonals and will
         # not be used in the end.
         with warnings.catch_warnings():
@@ -262,10 +257,10 @@ def get_scc(
             except AttributeError:
                 pass
             # Compute raw pearson coeff for this diag
-            corr_diag[d] = ss.pearsonr(d1, d2)[0]
+            corr_diag[bin_idx] = ss.pearsonr(diag_1, diag_2)[0]
         # Compute weight for this diag
-        r2k = cu.vstrans(d1, d2)
-        weight_diag[d] = len(d1) * r2k
+        r2k = cu.vstrans(diag_1, diag_2)
+        weight_diag[bin_idx] = len(diag_1) * r2k
     # Normalize weights
     weight_diag /= sum(weight_diag)
 
@@ -276,7 +271,7 @@ def get_scc(
 
 
 def make_chromlist(
-    c: 'cooler.Cooler',
+    clr: cooler.Cooler,
     whitelist: Optional[Iterable[str]] = None,
     blacklist: Optional[Iterable[str]] = None,
     min_size: Optional[int] = None,
@@ -302,7 +297,7 @@ def make_chromlist(
     chromlist : list of strs
         Lengths of chromosomes to process
     """
-    chroms = c.chroms()[:].set_index("name")
+    chroms = clr.chroms()[:].set_index("name")
     chromlist = chroms.index.values.tolist()
     if whitelist is not None:
         chromlist = whitelist

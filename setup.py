@@ -4,10 +4,10 @@
 """Reimplementation of the hicrep with added support for sparse matrix and multiple chromosomes.
 """
 
-import re
-import os
-from setuptools import setup, find_packages
 import codecs
+import os
+import re
+from setuptools import setup, find_packages
 
 CLASSIFIERS = [
     "Development Status :: 3 - Alpha",
@@ -27,7 +27,7 @@ CLASSIFIERS = [
     "Operating System :: MacOS",
 ]
 
-name = "hicreppy"
+NAME = "hicreppy"
 
 LICENSE = "GPLv2"
 URL = "https://github.com/cmdoret/hicreppy"
@@ -42,6 +42,7 @@ with open("requirements.txt", "r") as f:
 
 
 def get_version():
+    """Retrieve pkg version from init file"""
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
         open(os.path.join("hicreppy", "__init__.py")).read(),
@@ -51,7 +52,7 @@ def get_version():
 
 
 setup(
-    name=name,
+    name=NAME,
     author="cmdoret",
     author_email="cyril.matthey-doret@pasteur.fr",
     description=DESCRIPTION,

@@ -1,5 +1,5 @@
+"""Command line interface of hicreppy"""
 # -*- coding: utf-8 -*-
-import sys
 import click
 import cooler as clr
 from .. import hicrep as cr
@@ -12,7 +12,8 @@ from .. import __version__
     "-r",
     default=10,
     show_default=True,
-    help="Maximum value of the smoothing parameter h to explore. All consecutive integer values from 0 to this value will be tested.",
+    help="Maximum value of the smoothing parameter h to explore. All consecutive "
+    "integer values from 0 to this value will be tested.",
 )
 @click.option(
     "--max-dist",
@@ -31,7 +32,8 @@ from .. import __version__
     "--whitelist",
     "-w",
     default="",
-    help="Only include those chromosomes in the analysis. List of comma-separated chromosome names.",
+    help="Only include those chromosomes in the analysis. List of "
+    "comma-separated chromosome names.",
 )
 @click.argument("cool1", type=click.Path(exists=False))
 @click.argument("cool2", type=click.Path(exists=False))
@@ -39,12 +41,16 @@ def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
     """Find the optimal value for smoothing parameter h.
     The optimal h-value is printed to stdout. Run informations are printed to stderr.
     """
-    c1 = clr.Cooler(cool1)
-    c2 = clr.Cooler(cool2)
-    wl = _parse_cli_chroms(whitelist)
-    bl = _parse_cli_chroms(blacklist)
+    clr_1 = clr.Cooler(cool1)
+    clr_2 = clr.Cooler(cool2)
+    clean_wl = _parse_cli_chroms(whitelist)
+    clean_bl = _parse_cli_chroms(blacklist)
     # Print best h value to stdout
-    print(cr.h_train(c1, c2, max_dist, h_max, whitelist=wl, blacklist=bl))
+    print(
+        cr.h_train(
+            clr_1, clr_2, max_dist, h_max, whitelist=clean_wl, blacklist=clean_bl
+        )
+    )
 
 
 @click.command()
@@ -83,9 +89,7 @@ def htrain_cmd(cool1, cool2, max_dist, h_max, whitelist, blacklist):
 )
 @click.argument("cool1", type=click.Path(exists=False))
 @click.argument("cool2", type=click.Path(exists=False))
-def genome_scc_cmd(
-    cool1, cool2, max_dist, h_value, subsample, whitelist, blacklist
-):
+def genome_scc_cmd(cool1, cool2, max_dist, h_value, subsample, whitelist, blacklist):
     """Compute the stratum-adjusted correlation coefficient for input matrices"""
     c1 = clr.Cooler(cool1)
     c2 = clr.Cooler(cool2)
@@ -97,9 +101,7 @@ def genome_scc_cmd(
         try:
             subsample = float(subsample)
         except ValueError:
-            print(
-                "Subsample must be a float between 0 and 1 or an integer."
-            )
+            print("Subsample must be a float between 0 and 1 or an integer.")
             raise
     print(
         cr.genome_scc(
@@ -120,7 +122,6 @@ def cli():
     """
     Type -h or --help after any subcommand for more information.
     """
-    ...
 
 
 cli.add_command(htrain_cmd, name="htrain")
@@ -131,5 +132,4 @@ def _parse_cli_chroms(chroms):
     """Process a string of comma separated chromosomes into a list"""
     if chroms == "":
         return None
-    else:
-        return chroms.split(",")
+    return chroms.split(",")
