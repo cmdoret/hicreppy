@@ -5,7 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/hicreppy.svg)](https://badge.fury.io/py/hicreppy)
 [![build](https://github.com/cmdoret/hicreppy/actions/workflows/build.yml/badge.svg)](https://github.com/cmdoret/hicreppy/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/cmdoret/hicreppy/branch/master/graph/badge.svg)](https://codecov.io/gh/cmdoret/hicreppy)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/cmdoret/hicreppy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cmdoret/hicreppy/context:python)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/07e29576e19447a18783303d12ce2539)](https://www.codacy.com/gh/cmdoret/hicreppy/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cmdoret/hicreppy&amp;utm_campaign=Badge_Grade)
 
 This is a python reimplementation of hicrep's algorithm with added support for sparse matrices (in .cool format). 
 
