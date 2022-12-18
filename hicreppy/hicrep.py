@@ -1,3 +1,4 @@
+"""Core functionality of hicreppy."""
 import sys
 from typing import Optional, Iterable, List, Tuple
 import warnings
@@ -66,7 +67,7 @@ def h_train(
             "Try reducing max_dist."
         )
 
-    h_value = None
+    h_value = h_idx = None
     prev_scc = -np.inf
     for h_idx, h_value in enumerate(range(h_max)):
         # Compute SCC values separately for each chromosome
@@ -172,7 +173,7 @@ def genome_scc(
     chromlist, chroms_lengths = make_chromlist(
         mat1, whitelist, blacklist, min_size=min_size
     )
-    if not len(chromlist):
+    if not chromlist:
         raise KeyError(
             "All chromosomes were too short and have been discarded. "
             "Try reducing max_dist."
@@ -192,7 +193,7 @@ def genome_scc(
 
     # Compute SCC values separately for each chromosome
     chroms_scc = np.zeros(len(chromlist))
-    for c, chrom in enumerate(chromlist):
+    for c_idx, chrom in enumerate(chromlist):
         chrom_1 = mat1.matrix(sparse=True, balance=False).fetch(chrom)
         chrom_2 = mat2.matrix(sparse=True, balance=False).fetch(chrom)
         # Sample 10% contacts and smooth 10 times for this chromosome
@@ -209,7 +210,7 @@ def genome_scc(
         smooth_1 = cu.smooth(chrom_1, h)
         smooth_2 = cu.smooth(chrom_2, h)
 
-        chroms_scc[c] = get_scc(smooth_1, smooth_2, max_bins=max_bins)
+        chroms_scc[c_idx] = get_scc(smooth_1, smooth_2, max_bins=max_bins)
     # Compute the genome SCC using the weighted averge of chromosomes
     # SCC by their lengths. NaN values of SCC are not considered
     # This happens when comparing empty diagonals

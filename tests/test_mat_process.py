@@ -20,11 +20,11 @@ def gauss_mat(meanx, meany, std, shape=(100, 100)):
     grid_x, grid_y = np.meshgrid(points_x, points_y)
 
     # evaluate kernels at grid points
-    xxyy = np.c_[grid_x.ravel(), grid_y.ravel()]
-    zz = k.pdf(xxyy)
+    grid = np.c_[grid_x.ravel(), grid_y.ravel()]
+    gaussian = k.pdf(grid)
 
     # reshape and plot image
-    g_mat = zz.reshape(shape)
+    g_mat = gaussian.reshape(shape)
     g_mat = sp.coo_matrix(g_mat)
     return g_mat
 
