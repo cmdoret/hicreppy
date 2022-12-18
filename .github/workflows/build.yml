@@ -25,10 +25,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install pytest codecov pylint pytest-cov pytest-pylint
+        python -m pip install pytest==7.2.0 codecov==2.1.12 pytest-cov==4.0.0
         python -m pip install -Ur requirements.txt
         python -m pip install -e .
-    - name: Run tests, lint and compute coverage with pytest
+        pip list
+    - name: Run tests and compute coverage with pytest
       run: |
-        pytest --pylint --pylint-error-types=EF --pylint-rcfile=.pylintrc --cov=hicreppy
+        pytest --cov=hicreppy
         codecov
